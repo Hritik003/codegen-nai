@@ -81,7 +81,7 @@ pip install fastapi uvicorn dspy openai
 After installing the required packages, it’s a good idea to save them in a `requirements.txt` file, which can be used to recreate the environment later:
 
 ```bash
-pip freeze > requirements.txt
+pip install -r requirements.txt
 ```
 
 ### Step 6: Deactivate the Virtual Environment
