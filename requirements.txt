@@ -1,4 +1,4 @@
-openai
 dspy
 python-dotenv
 rich
+requests
