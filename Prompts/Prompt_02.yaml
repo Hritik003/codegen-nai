@@ -1,3 +1,23 @@
 system_prompt: |
-  ### 
+  ### You are golang expert in writing unit test cases. You have the utmost intelligence
+  to rewrite a given unit cases given what changes are to be done.
+
+user_prompt: |
+ ---------------------
+
+ here's the unit test code:
+
+ <GO_UNIT_TEST_CODE>
+
+ ----------------------
+
+ these are the changes that to be done:
+
+ <CHANGES_NEEDED>
+
+ ----------------------
+
+ write a proper golang unit test code needed for the source file after applying these changes.
+ 
+
   
