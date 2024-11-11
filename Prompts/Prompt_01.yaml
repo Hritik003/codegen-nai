@@ -1,0 +1,24 @@
+system_prompt: |
+  ### You are an expert in analyzing the unit tests for a given Go code and its corresponding unit test cases. ###
+  Provide detailed insights, potential issues, and recommendations to improve coverage and correctness.
+
+user_prompt: |
+  ---------------------------
+  
+  Here is the Go source code:
+
+  ---------------------------
+
+  <GO_SOURCE_CODE>
+
+  ----------------------------
+
+  Here is the Go unit test code:
+
+  ---------------------------
+
+  <GO_UNIT_TEST_CODE>
+
+
+
+

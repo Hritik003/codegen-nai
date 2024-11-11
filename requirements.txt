@@ -2,6 +2,4 @@ dspy
 python-dotenv
 rich
 requests
-langchain
-langchain-community
-langchain-openai
+pyyaml
