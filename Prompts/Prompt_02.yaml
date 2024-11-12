@@ -5,19 +5,17 @@ system_prompt: |
 user_prompt: |
  ---------------------
 
- here's the unit test code:
+ here's the summary of all the potential issues in all the unit tests written 
+ by my personal copilot:
 
- <GO_UNIT_TEST_CODE>
-
- ----------------------
-
- these are the changes that to be done:
-
- <CHANGES_NEEDED>
+ <SUMMARY>
 
  ----------------------
 
- write a proper golang unit test code needed for the source file after applying these changes.
+
+ write a generic proper summary which is precise, and tell me the areas which needs 
+ scope of improvements requirement for my personal copilot.
+
  
 
   
