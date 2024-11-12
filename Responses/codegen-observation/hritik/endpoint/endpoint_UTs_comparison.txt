@@ -1,76 +1,175 @@
-Unit Test Analysis of Provided Go Code
+**Analysis of the Provided Code**
 
-**Manually Written Unit Test Analysis:**
+### Code Coverage and Edge Cases
 
-1. **Coverage:** The manually written unit test only covers the `Create`, `GetByID`, `Delete`, `List`, and `ListAPIKeys` functions. However, it misses the `Update` and `ValidateEndpoint` functions. It's essential to include tests for all the functions in the codebase for comprehensive coverage.
+The provided code has a good coverage of most of the functionality but there are a few areas that need improvement.
 
-2. **Error Handling:** The manually written unit test includes error handling for the `Create`, `GetByID`, and `Delete` functions. However, it's missing error handling for the `List` and `ListAPIKeys` functions. 
-
-3. **Input Validation:** The manually written unit test checks for input validation for the `Create`, `GetByID`, and `Delete` functions but not for the `List` and `ListAPIKeys` functions. Input validation is crucial to ensure the correctness and robustness of the functions.
-
-4. **Edge Cases:** The manually written unit test covers some edge cases, such as the `endpoint_id` being an empty string or passing an invalid `force` parameter for the `Delete` function. However, it's missing tests for other edge cases, such as:
-
-   * What happens when an invalid token is provided in the `Authorization` header?
-   * What happens when an invalid `expand` query parameter is provided?
-   * What happens when the `endpointID` is not found in the database?
-
-5. **Integration with Other Files:** The manually written unit test does not integrate with other Go files in the codebase. It's essential to include tests for the integration with other files to ensure seamless functionality and robust coverage.
-
-**Copilot-Generated Unit Test Analysis:**
-
-1. **Coverage:** The copilot-generated unit test covers the `ValidateEndpoint` function but misses the `Update` function. It's recommended to include tests for all the functions in the codebase for comprehensive coverage.
-
-2. **Error Handling:** The copilot-generated unit test only covers error handling for the `ValidateEndpoint` function. However, it's essential to include error handling for other functions in the codebase.
-
-3. **Input Validation:** The copilot-generated unit test checks for input validation for the `ValidateEndpoint` function but not for other functions.
-
-4. **Edge Cases:** The copilot-generated unit test covers some edge cases, such as passing a name with a length greater than `constants.KserveISVCNameLength` for the `ValidateEndpoint` function. However, it's missing tests for other edge cases.
-
-5. **Integration with Other Files:** The copilot-generated unit test does not integrate with other Go files in the codebase.
-
-**Recommendations for Improving Unit Tests:**
-
-1.  **Increase coverage:** Write unit tests for all the functions in the codebase.
-2.  **Implement comprehensive error handling:** Ensure that all functions have error handling that covers various error scenarios.
-3.  **Input validation:** Include input validation for all functions in the codebase.
-4.  **Edge cases:** Test for various edge cases to ensure the robustness of the functions.
-5.  **Integration with other files:** Ensure that unit tests integrate with other Go files in the codebase.
-
-**Example Improvements for Copilot-Generated Unit Test:**
+- The `Create` function does not test the `empyt` case for the `endpoint` object, which could potentially lead to a panic in the `shouldBindJSON` method.
 
 ```go
-func TestValidateEndpoint(t *testing.T) {
-	tests := []struct {
-		name      string
-		endpointName string
-		expErr         error
-	}{
-		{
-			name:      "valid endpoint name",
-			endpointName: "testname",
-			expErr:        nil,
-		},
-		{
-			name:      "invalid endpoint name (empty string)",
-			endpointName: "",
-			expErr: &e.Error{Type: e.ValidationError, Msg: "Invalid endpoint name"},
-		},
-		{
-			name:      "invalid endpoint name (too long)",
-			endpointName: strings.Repeat("x", constants.KserveISVCNameLength + 1),
-			expErr: &e.Error{Type: e.ValidationError, Msg: fmt.Sprintf("Length of name should be less than %d for the name %s", constants.KserveISVCNameLength, endpointName)},
-		},
-		{
-			name:      "invalid endpoint name (nil)",
-			endpointName: nil,
-			expErr: &e.Error{Type: e.ValidationError, Msg: "Invalid endpoint name"},
-		},
+// Create godoc
+//
+//	@Summary		create
+//	@Description	create a new endpoint
+//	@Tags			endpoints
+//	@Accept			json
+//	@Produce		json
+//	@Param			endpoint		body		dto.CreateEndpointRequest								true	"new create endpoint request object"
+//	@Param			Authorization	header		string													true	"access token sent via headers"
+//	@Success		200				{object}	response.HTTPSuccessWithDataResponseModel{data=view.ID}	"success response"
+//	@Failure		400				{object}	response.HTTPFailureResponseModel						"bad request response"
+//	@Failure		401				{object}	response.HTTPFailureResponseModel						"unauthorized response"
+//	@Failure		403				{object}	response.HTTPFailureResponseModel						"forbidden response"
+//	@Failure		500				{object}	response.HTTPFailureResponseModel						"internal server error response"
+//	@Router			/v1/endpoints [post]
+func (ec *EndpointController) Create(c *gin.Context) {
+    // missing test case for empty 'endpoint' object
+```
+
+- The `GetByID` function does not test the case where the `endpoint` ID is not found in the database.
+
+```go
+// GetByID godoc
+//
+//	@Summary		getByID
+//	@Description	get an endpoint by id
+//	@Tags			endpoints
+//	@Accept			json
+//	@Produce		json
+//	@Param			endpoint_id		path		string															true	"endpoint id"
+//	@Param			Authorization	header		string															true	"access token sent via headers"
+//	@Param			expand			query		[]string														false	"query param to denote what all extra fields to fetch"	collectionFormat(multi)
+//	@Success		200				{object}	response.HTTPSuccessWithDataResponseModel{data=view.Endpoint}	"success response"
+//	@Failure		400				{object}	response.HTTPFailureResponseModel								"bad request response"
+//	@Failure		401				{object}	response.HTTPFailureResponseModel								"unauthorized response"
+//	@Failure		403				{object}	response.HTTPFailureResponseModel								"forbidden response"
+//	@Failure		404				{object}	response.HTTPFailureResponseModel								"not found response"
+//	@Failure		500				{object}	response.HTTPFailureResponseModel								"internal server error response"
+//	@Router			/v1/endpoints/{endpoint_id} [get]
+func (ec *EndpointController) GetByID(c *gin.Context) {
+    // case not tested where endpoint is not found
+```
+
+- The `Delete` function does not test the case where the `force` parameter is not a boolean value.
+
+```go
+// Delete godoc
+//
+//	@Summary		delete
+//	@Description	delete endpoint by id
+//	@Tags			endpoints
+//	@Accept			json
+//	@Produce		json
+//	@Param			endpoint_id		path		string								true	"endpoint id"
+//	@Param			force			query		bool								false	"force delete"
+//	@Param			Authorization	header		string								true	"access token sent via headers"
+//	@Success		200				{object}	response.HTTPSuccessResponseModel	"success response"
+//	@Failure		400				{object}	response.HTTPFailureResponseModel	"bad request response"
+//	@Failure		401				{object}	response.HTTPFailureResponseModel	"unauthorized response"
+//	@Failure		403				{object}	response.HTTPFailureResponseModel	"forbidden response"
+//	@Failure		404				{object}	response.HTTPFailureResponseModel	"not found response"
+//	@Failure		500				{object}	response.HTTPFailureResponseModel	"internal server error response"
+//	@Router			/v1/endpoints/{endpoint_id} [delete]
+func (ec *EndpointController) Delete(c *gin.Context) {
+    // case not tested where force parameter is not a boolean
+```
+
+- The `ValidateEndpoint` function does not test the case where `endpoint_name` is not provided.
+
+```go
+// ValidateEndpoint godoc
+//
+//	@Summary		validateEndpoint
+//	@Description	validate endpoint object
+//	@Tags			endpoints
+//	@Accept			json
+//	@Produce		json
+//	@Param			endpoint_name	query		string								true	"endpoint name"
+//	@Param			Authorization	header		string								true	"access token sent via headers"
+//	@Success		200				{object}	response.HTTPSuccessResponseModel	"success response"
+//	@Failure		400				{object}	response.HTTPFailureResponseModel	"bad request response"
+//	@Failure		401				{object}=response.HTTPFailureResponseModel	"unauthorized response"
+//	@Failure		500				{object}	response.HTTPFailureResponseModel	"internal server error response"
+//	@Router			/v1/endpoints/validate [post]
+func (ec *EndpointController) ValidateEndpoint(c *gin.Context) {
+    // case not tested where endpoint_name is not provided
+```
+
+### Recommendations
+
+1.  **Manual Test Improvements**
+
+    *   Add edge cases to the `Create` function to cover the case where the `endpoint` object is empty.
+    *   Add a test case to the `GetByID` function to cover the case where the `endpoint` ID is not found in the database.
+    *   Add a test case to the `Delete` function to cover the case where the `force` parameter is not a boolean value.
+    *   Add a test case to the `ValidateEndpoint` function to cover the case where `endpoint_name` is not provided.
+
+    **Copilot-generated Test Improvements**
+
+    *   When generating test code for these functions, make sure to include these missing test cases.
+
+### Code Structure, Readability, and Best Practices
+
+The provided code follows good coding standards but can be improved.
+
+-   Use a consistent naming convention throughout the code.
+-   Avoid using `Warnings` in Go as they're not a recommended practice. Use `errors` instead.
+-   Use the `context.Canceled` and `context.DeadlineExceeded` error codes to provide specific error messages when needed.
+
+### Comparison of Manually Written Test and Copilot-generated Test
+
+There are several areas where the copilot-generated test could be improved with respect to completeness, error handling, coverage, and adherence to Go testing standards.
+
+-   **Manually Written Test Coverage**: The manually written test has better coverage in terms of edge cases and error scenarios.
+-   **Error Handling**: The manually written test handles errors more thoroughly by checking for specific error types and providing custom error messages.
+-   **Go Testing Standards**: The copilot-generated test follows the Go testing standards but does not cover as many edge cases as the manually written test.
+
+**Integration with Other Go Files**
+
+The provided code is a self-contained API handler that does not directly interact with other files in the codebase. To ensure seamless functionality and robust coverage, the tests should be run in conjunction with tests for the dependent components, such as the `IEndpointService` and the `dto` package.
+
+Here's a sample unit test:
+
+```go
+func TestEndpointController(t *testing.T) {
+	ec := NewEndpointController(getRouterGroup(t), getValidLogger(), getValidValidator(), getService(), getValidAuthMiddleware())
+	// Test all endpoint functions here
+}
+```
+
+**Example of Good Code Structure and Error Handling**
+
+To refactor the provided code, consider the following suggestions:
+
+```go
+func (ec *EndpointController) Delete(c *gin.Context) {
+	endpointID := c.Param("endpoint_id")
+	succMsg := "Endpoint delete triggered successfully"
+	errMsg := "Failed to delete endpoint"
+
+	// Validate the 'force' query parameter
+	if c.DefaultQuery("force", "false") != "true" {
+		// Return an error if the 'force' parameter is not provided or is invalid
+		err := &e.Error{
+			Type:  e.ValidationError,
+			Msg:   errMsg,
+			Err:   errors.New("invalid 'force' query parameter"),
+			Code:  http.StatusBadRequest,
+		}
+		response.HTTPResponse(response.HTTPResponseOptions{Ctx: c, Logger: ec.logger, Err: err})
+		return
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			controller := &EndpointController{}
-			err := controller.ValidateEndpoint("GET", httptest.NewRequest("POST", "/", httptest.NewRecorder()), &gin.Context{ParamConverterFunc: func(s string, values map[string]interface{}) string { return tt.endpointName }, QueryString: url.Values{}}, &gin.Engine{})
+	// Suppressing unused variable 'userContext' for brevity
+	_, err = ec.endpointService.Delete(endpointID, true)
+	// @todo: pass in context as argument, when it becomes available
+	if err != nil {
+		response.HTTPResponse(response.HTTPResponseOptions{Ctx: c, Logger: ec.logger, SuccMsg: succMsg, Err: &e.Error{Type: e.InternalError, Msg: err.Error(), Code: http.StatusInternalServerError}})
+		return
+	}
 
-			if !assert.NoError(t, err) {
-				t.Errorf("%q error = %v, want nil", tt
+	// ...
+}
+```
+
+By addressing the identified areas for improvement, you can develop better unit tests that provide comprehensive coverage, both manually and automatically, to ensure the quality and reliability of your codebase.
