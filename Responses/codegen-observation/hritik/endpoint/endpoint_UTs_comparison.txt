@@ -1,0 +1,76 @@
+Unit Test Analysis of Provided Go Code
+
+**Manually Written Unit Test Analysis:**
+
+1. **Coverage:** The manually written unit test only covers the `Create`, `GetByID`, `Delete`, `List`, and `ListAPIKeys` functions. However, it misses the `Update` and `ValidateEndpoint` functions. It's essential to include tests for all the functions in the codebase for comprehensive coverage.
+
+2. **Error Handling:** The manually written unit test includes error handling for the `Create`, `GetByID`, and `Delete` functions. However, it's missing error handling for the `List` and `ListAPIKeys` functions. 
+
+3. **Input Validation:** The manually written unit test checks for input validation for the `Create`, `GetByID`, and `Delete` functions but not for the `List` and `ListAPIKeys` functions. Input validation is crucial to ensure the correctness and robustness of the functions.
+
+4. **Edge Cases:** The manually written unit test covers some edge cases, such as the `endpoint_id` being an empty string or passing an invalid `force` parameter for the `Delete` function. However, it's missing tests for other edge cases, such as:
+
+   * What happens when an invalid token is provided in the `Authorization` header?
+   * What happens when an invalid `expand` query parameter is provided?
+   * What happens when the `endpointID` is not found in the database?
+
+5. **Integration with Other Files:** The manually written unit test does not integrate with other Go files in the codebase. It's essential to include tests for the integration with other files to ensure seamless functionality and robust coverage.
+
+**Copilot-Generated Unit Test Analysis:**
+
+1. **Coverage:** The copilot-generated unit test covers the `ValidateEndpoint` function but misses the `Update` function. It's recommended to include tests for all the functions in the codebase for comprehensive coverage.
+
+2. **Error Handling:** The copilot-generated unit test only covers error handling for the `ValidateEndpoint` function. However, it's essential to include error handling for other functions in the codebase.
+
+3. **Input Validation:** The copilot-generated unit test checks for input validation for the `ValidateEndpoint` function but not for other functions.
+
+4. **Edge Cases:** The copilot-generated unit test covers some edge cases, such as passing a name with a length greater than `constants.KserveISVCNameLength` for the `ValidateEndpoint` function. However, it's missing tests for other edge cases.
+
+5. **Integration with Other Files:** The copilot-generated unit test does not integrate with other Go files in the codebase.
+
+**Recommendations for Improving Unit Tests:**
+
+1.  **Increase coverage:** Write unit tests for all the functions in the codebase.
+2.  **Implement comprehensive error handling:** Ensure that all functions have error handling that covers various error scenarios.
+3.  **Input validation:** Include input validation for all functions in the codebase.
+4.  **Edge cases:** Test for various edge cases to ensure the robustness of the functions.
+5.  **Integration with other files:** Ensure that unit tests integrate with other Go files in the codebase.
+
+**Example Improvements for Copilot-Generated Unit Test:**
+
+```go
+func TestValidateEndpoint(t *testing.T) {
+	tests := []struct {
+		name      string
+		endpointName string
+		expErr         error
+	}{
+		{
+			name:      "valid endpoint name",
+			endpointName: "testname",
+			expErr:        nil,
+		},
+		{
+			name:      "invalid endpoint name (empty string)",
+			endpointName: "",
+			expErr: &e.Error{Type: e.ValidationError, Msg: "Invalid endpoint name"},
+		},
+		{
+			name:      "invalid endpoint name (too long)",
+			endpointName: strings.Repeat("x", constants.KserveISVCNameLength + 1),
+			expErr: &e.Error{Type: e.ValidationError, Msg: fmt.Sprintf("Length of name should be less than %d for the name %s", constants.KserveISVCNameLength, endpointName)},
+		},
+		{
+			name:      "invalid endpoint name (nil)",
+			endpointName: nil,
+			expErr: &e.Error{Type: e.ValidationError, Msg: "Invalid endpoint name"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			controller := &EndpointController{}
+			err := controller.ValidateEndpoint("GET", httptest.NewRequest("POST", "/", httptest.NewRecorder()), &gin.Context{ParamConverterFunc: func(s string, values map[string]interface{}) string { return tt.endpointName }, QueryString: url.Values{}}, &gin.Engine{})
+
+			if !assert.NoError(t, err) {
+				t.Errorf("%q error = %v, want nil", tt

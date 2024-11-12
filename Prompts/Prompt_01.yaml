@@ -26,7 +26,7 @@ user_prompt: |
   <GO_SOURCE_CODE>
   ---------------------------
 
-  Here is the Go manually unit test code:
+  Here is the Go manually written unit test code:
   ---------------------------
   <GO_MANUAL_UNIT_TEST_CODE>
   ---------------------------
@@ -40,4 +40,3 @@ user_prompt: |
 
   Provide the response in a plain text format so that it is
   easy to read 
-  

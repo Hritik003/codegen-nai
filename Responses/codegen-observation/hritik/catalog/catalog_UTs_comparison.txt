@@ -1,0 +1,116 @@
+**Manual Unit Test Analysis:**
+
+1.  Coverage and Correctness:
+
+    The manually written unit test covers the main functionality of the CatalogController, including error handling, validation, and service interactions. However, it seems to be missing test cases for some edge scenarios such as:
+    - Handling a situation where `ShouldBindJSON` returns an error and then subsequent validation passes.
+    - Checking if the `GetRequirements` method correctly handles an empty or malformed `CatalogRequirements` struct.
+
+    Improvement: Consider adding more test cases to cover these scenarios and ensure complete coverage.
+
+2.  Structure and Readability:
+
+    The manual test uses a mix of `testing.T` and `assert` statements, making it harder to follow. Consider using a single assertion library or other testing frameworks like ` testify` for better readability and maintainability.
+
+    Improvement: Standardize the test assertion approach throughout the test file.
+
+3.  Code Organization:
+
+    There's a mix of test cases in the same file. Consider organizing them into separate test functions or using a struct with methods for better structure and discovery.
+
+    Improvement: Organize the tests into groups or use methods to improve code organization.
+
+4.  Error Handling:
+
+    While the manual test handles some error scenarios, there might be cases where service returns a specific error that needs to be checked and handled.
+
+    Improvement: Enhance testing error handling by checking service-specific error types and behaviors.
+
+**Copilot-generated Unit Test Analysis (catalog_codegen_test.go):**
+
+1.  Coverage and Correctness:
+
+    The copilot-generated test covers the basic functionality but seems to be lacking in terms of edge cases and specific error handling. For instance:
+    - There is no test for when the `ShouldBindJSON` or `validator.Struct` returns an error after the first succeeds.
+    - There is no test for error handling when `catalogService.Create` or `catalogService.List` fails.
+
+    Improvement: Add tests for these scenarios to ensure comprehensive coverage.
+
+2.  Test Structure:
+
+    The copilot-generated test follows the conventional Go testing style but could be further improved:
+    - It would be beneficial to use a more descriptive name for the test struct and its methods.
+    - Individual test functions are too long, making them harder to read and understand.
+
+    Improvement: Use a separate test struct and shorter, named test methods for better organization and readability.
+
+3.  Code Duplication:
+
+    There is redundant code in `List` and `GetRequirements` tests, as they have almost identical error handling.
+
+    Improvement: Extract the common error handling into a separate method to eliminate duplication.
+
+**Comparison of Manual and Copilot-generated Tests:**
+
+-   Both tests seem to be missing test cases for edge scenarios and comprehensive error handling.
+-   The manual test has better structure, readability, and organization, but is missing some test cases.
+-   The copilot-generated test follows conventional testing standard, but requires improvements in terms of code duplication and error handling.
+
+**Recommendations:**
+
+1\. Merge the copilot-generated test with the manual test to create a comprehensive and robust test suite that covers all the edge cases.
+
+2\. Remove duplicated code from the copilot-generated test.
+
+3\. Standardize the testing approach throughout the test file and consider using an assertion library like `testify` for a cleaner look.
+
+4\. Extract common error handling into separate methods.
+
+5\. Use meaningful names for test structs and methods for a better understanding of the test.
+
+**Complete Unit Test:**
+
+You could reimplement the unit test with the recommendations above in this format:
+
+```go
+package catalog
+
+import (
+	"context"
+	"encoding/json"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/nutanix-core/nai-api/common/errors"
+	"github.com/nutanix-core/nai-api/common/logger"
+	"github.com/nutanix-core/nai-api/iep/constants"
+	dto "github.com/nutanix-core/nai-api/iep/internal/dto"
+	"github.com/nutanix-core/nai-api/iep/internal/middleware"
+	auth "github.com/nutanix-core/nai-api/iep/internal/middleware"
+	"github.com/nutanix-core/nai-api/iep/internal/service"
+
+	"github.com/gin-gonic/gin"
+)
+
+func SetupTest(dependencies TestingDependencies) (*CatalogController, *TestCatalogController) {
+	logger := logger.GetLoggerForTest()
+	controller := &CatalogController{
+		v1Route: dependencies.V1Route,
+		logger:  logger,
+		validator:    dependencies.Validator,
+		catalogService: dependencies.Service,
+		authMiddleware: dependencies.AuthMiddleware,
+	}
+	return controller, &testCatalogController{
+		Dependencies: &dependencies.Dependencies,
+	}
+}
+
+func TestCatalogController(t *testing.T) {
+	dependencies := getDependenciesForTesting(t)
+	controller, testBase := SetupTest(dependencies)
+
+	t.Run("Testing create valid data", func(t *testing.T) {
+		// Create the object that will be sent as JSON
+		MakeJson

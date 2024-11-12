@@ -1,0 +1,114 @@
+**Manual Unit Test Analysis**
+
+The provided manual unit test is incomplete, missing essential test cases for the `healthClient` struct methods, specifically `NewHealthClient`, `CheckHealth`, and `checkHealthInternal`. 
+
+1. Missing Test Cases for NewHealthClient:
+   - Verify that a nil client passed to NewHealthClient returns an error.
+   - Test the creation of a health client with a valid client.
+
+2. Missing Test Cases for CheckHealth:
+   - Test the case where the health check URL is invalid ( dns resolution fails or service is unreachable).
+   - Test the case where the health check URL is valid but returns a status code other than 200 (HealthyStatusCode).
+   - Test the case where the health check URL returns a status code of 200 but the request body cannot be closed ( simulate connection error).
+
+3. Missing Test Cases for checkHealthInternal:
+   - Test cases for various verify conditions like bodiless HTTP requests, different status codes, etc.
+
+To improve this unit test, consider adding these missing test cases and verifying the expected behavior.
+
+**Copilot-Generated Unit Test Analysis**
+
+The copilot-generated unit test (`health_codegen_test.go`) also has its limitations and areas of improvement:
+
+1. Missing Test Cases:
+   - Apart from testing the `CheckHealth` method, the copilot-generated test does not verify the `checkHealthInternal` method's behavior when creating an HTTP request, checking response status codes, or handling connection errors.
+   - There's a missing test for a nil client is passed to `NewHealthClient`.
+
+2. Error Handling:
+   - The copilot-generated test does not check error handling on an empty URL.
+
+3. Test Structure:
+   - Copilot-generated tests follow the CorrectTestPattern, but the struct keyword for non-composite fields is missing.
+
+4. Go Testing Standards:
+   - Copilot-generated tests do not separate test declarations from test logic.
+
+To improve the copilot-generated test, consider adding the following:
+- Test for `checkHealthInternal` with different status codes.
+- Handle potential connections error in `checkHealthInternal`.
+- Check the error output with a malformed request.
+
+Here's an updated example of the copilot-generated test.
+
+```go
+func TestCheckHealth(t *testing.T) {
+    tcs := []struct {
+        desc string
+        req  string
+        want enum.ServiceHealthStatusCode
+    }{
+        {"test empty url", "", enum.UnknownStatusCode},
+        {"test a healthy URL", "http://example.com", enum.HealthyStatusCode},
+        {"test an unhealthy URL", "https://example.com:443/show-me-what-google-ient-explicity-does-not-have", enum.CriticalStatusCode},
+    }
+
+    for i := range(tcs) {
+        t.Run(tcs[i].desc, func(t *testing.T) {
+            hc, err := NewHealthClient(&testClient{}) //create new client object
+            if err != nil {
+                t.Fatal(err)
+            }
+            got, err := hc.CheckHealth(tcs[i].req)
+            if err != nil {
+                t.Fatal(err)
+                return
+            }
+            if got != tcs[i].want {
+                t.Errorf("expected %d, got %d", req.want, got)
+            }
+        })
+    }
+}
+
+func (tc testClient) String() string {
+    return "context.Background() client"
+}
+
+func (tc *testClient) Do(ctx context.Context, req *http.Request) (*http.Response, *http.Response, error) {
+    return &http.Response{}, nil, nil
+}
+```
+
+To improve code structure, readability, performance, and best practices, you can consider the following suggestions for `healthClient` and related methods:
+- Remove global variables like constants.MaxServiceHealthAttempts; instead, pass these as parameters to functions or make the constants be a part of the structure.
+- Reduce redundant function calls by evaluating status after sleep in CheckHealth.
+- Avoid creating an IClient type but use HTTP client to achieve similar behavior. This makes your code cleaner and results in better performance.
+
+**Integration with the Codebase**
+
+- To ensure the seamless integration of unit tests with the rest of the codebase, it would be a good practice to put tests in separate files for each package. This will make easier to debug them and maintain the dependencies related to the tests.
+
+To create better integration with the codebase consider renaming the unit test files and naming the package in line with the package name and naming in your structs.
+
+Based on suggestion above here is how the relatable test files could look like:
+
+```go
+//health_test.go
+package health
+
+import (
+   // related code here...
+)
+
+func TestHealth(t *testing.T) {
+    //tc
+}
+
+```
+
+And modification the current test file fixing all mentioned above points.
+
+```go
+health_codegen_test.go
+```
+This will improve the overall cleanliness, maintainability and readability for each of your unit test files

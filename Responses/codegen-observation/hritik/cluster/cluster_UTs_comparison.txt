@@ -1,0 +1,91 @@
+**Unit Test Analysis**
+
+### Manually Written Unit Test: cluster_test.go
+
+The manually written unit test, `cluster_test.go`, is well-structured and covers various aspects of the `ClusterController` functionality. It includes tests for the following methods:
+
+*   `GetClusterInfo`
+*   `GetClusterConfig`
+*   `UpdateClusterConfig`
+*   `buildEULAConfig`
+*   `buildPulseConfig`
+*   `buildLanguageConfig`
+
+The tests use the `subtests` package to group related tests together and provide better organization.
+
+### Copilot-Generated Unit Test: cluster_codegen_test.go
+
+The copilot-generated unit test, `cluster_codegen_test.go`, is incomplete and lacks comprehensive coverage of the `ClusterController` functionality. It only covers the `GetClusterInfo` method and includes a single test case.
+
+**Missing Test Cases in the Copilot-Generated Unit Test:**
+
+1.  `GetClusterConfig`: This method is missing tests. It retrieves configuration data and returns an error if any occurs.
+2.  `UpdateClusterConfig`: This method is also missing tests. It updates the cluster configuration based on user input and returns an error if any occurs.
+3.  `buildEULAConfig`, `buildPulseConfig`, and `buildLanguageConfig`: These methods are part of the `UpdateClusterConfig` method and are used to build specific configuration details based on user input. They are missing tests.
+
+**Inadequate Error Handling in the Copilot-Generated Unit Test:**
+
+The copilot-generated unit test only checks for successful responses and does not cover error scenarios.
+
+**Comparison with the Manually Written Unit Test**
+
+The manually written unit test covers a broader range of test cases, including error handling and boundary value analysis. In contrast, the copilot-generated unit test is limited to a single, successful test case.
+
+**Recommendations to Improve the Copilot-Generated Unit Test:**
+
+1.  **Implement more comprehensive test cases**: Include tests for `GetClusterConfig`, `UpdateClusterConfig`, `buildEULAConfig`, `buildPulseConfig`, and `buildLanguageConfig`.
+2.  **Cover error scenarios**: Test error handling conditions, such as input validation, data retrieval failures, and business logic errors.
+3.  **Use subtests**: Organize related tests into subtests to improve readability and maintainability.
+4.  **Improve code coverage**: Increase the code coverage of the copilot-generated unit test to at least 90% or higher.
+
+**Additional Recommendations**
+
+1.  **Integration with Other Go Files**: To ensure seamless functionality and robust coverage, integrate the unit tests with other Go files in the codebase. This can be achieved by using a testing framework like Go Test.
+2.  **Use Go Standard Library**: Adhere to Go standard library practices and use built-in functions and libraries wherever possible to improve code maintainability and readability.
+3.  **Use Test-Driven Development (TDD)**: Implement TDD principles to write unit tests before writing code, ensuring that the code meets the required specifications and requirements.
+
+**Example Refactored Code**
+
+Here's a sample refactored version of the copilot-generated unit test, incorporating the recommended improvements:
+
+```go
+package cluster
+
+import (
+	"bytes"
+	"encoding/json"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/nutanix-core/nai-api/iep/constants"
+	"github.com/nutanix-core/nai-api/iep/internal/dto"
+	"github.com/nutanix-core/nai-api/iep/internal/cluster"
+)
+
+func TestClusterController_GetClusterInfo(t *testing.T) {
+	cc := new(ClusterController)
+
+	testCaseWantResponse := response.HTTPSuccessWithDataResponseModel{Data: view.GetClusterInfo{}, SuccMsg: "Cluster info fetched successfully"}
+
+	getClusterInfoResponse, err := cc.GetClusterInfo(nil)
+	assert.NoError(t, err)
+	assert.Equal(t, testCaseWantResponse.Data, getClusterInfoResponse.Data, "response payload should match the expected value")
+	assert.Equal(t, testCaseWantResponse.SuccMsg, getClusterInfoResponse.SuccMsg, "response message should match the expected value")
+}
+
+func TestClusterController_GetClusterConfig(t *testing.T) {
+	cc := new(ClusterController)
+
+	listOptions, _ := GetListOptionsFromCtx(new(gin.Context))
+
+	// Without error
+	ConfigResponse := view.GetClusterConfig(df.DefaultClusterConfig())
+	cc.clusterService.GetConfig(listOptions)
+	getClusterConfigResponse, err := cc.GetClusterConfig(new(gin.Context))
+
+	testCaseWantResponse := response.HTTPSuccessWithDataResponseModel{Data: ConfigResponse, SuccMsg: "Cluster Config fetched successfully"}
+	assert.NoError(t, err, "No error should occur when cluster is queried")
+	assert.Equal(t, getClusterConfigResponse.Data, testCaseWantResponse.Data, "response payload should match the expected value")
+	assert.Equal(t, getClusterConfigResponse.SuccMsg, testCaseWantResponse.SuccMsg, "response message should match the expected value")
+
+	//
